@@ -180,9 +180,9 @@ def main():
                             alpha_matting_base_size=args.alpha_matting_base_size,
                         ),
                     )
-                    # if args.s3:
-                    #     print(os.path.basename(output.name), "here")
-                    #     s3.upload_file(output.name, args.bucket, "output/"+os.path.basename(output.name))
+                    if args.s3:
+                        print(os.path.basename(output.name), "here")
+                        s3.upload_file(output.name, args.bucket, "output/"+os.path.basename(output.name))
 
     else:
         w(
