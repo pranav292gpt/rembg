@@ -7,9 +7,22 @@ from pymatting.alpha.estimate_alpha_cf import estimate_alpha_cf
 from pymatting.foreground.estimate_foreground_ml import estimate_foreground_ml
 from pymatting.util.util import stack_images
 from scipy.ndimage.morphology import binary_erosion
+from time import time
 
 from .u2net import detect
 
+
+def timing_decorator(func):
+    def inner1(*args, **kwargs):
+        t1 = time()
+
+        res = func(*args, **kwargs)
+
+        t2 = time()
+        print(t2-t1)
+        return res
+
+    return inner1
 
 def alpha_matting_cutout(
     img,
@@ -78,6 +91,7 @@ def get_model(model_name):
         return detect.load_model(model_name="u2net")
 
 
+@timing_decorator
 def remove(
     data,
     model_name="u2net",

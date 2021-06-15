@@ -32,6 +32,7 @@ def index():
 
     if file_content == "":
         return {"error": "File content is empty"}, 400
+    print("here \n\n\n", request.args)
 
     alpha_matting = "a" in request.values
     af = request.values.get("af", type=int, default=240)
@@ -44,7 +45,8 @@ def index():
         "U2NETP_PATH",
         os.path.expanduser(os.path.join("~", ".u2net")),
     )
-    model_choices = [os.path.splitext(os.path.basename(x))[0] for x in set(glob.glob(model_path + "/*"))]
+    model_choices = []# [os.path.splitext(os.path.basename(x))[0] for x in set(glob.glob(model_path + "/*"))]
+    # print(model_choices)
     if len(model_choices) == 0:
         model_choices = ["u2net", "u2netp", "u2net_human_seg"]
 

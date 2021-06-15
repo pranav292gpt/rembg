@@ -1,6 +1,8 @@
 import argparse
 import glob
 import os
+import boto3
+from time import time
 from distutils.util import strtobool
 
 import filetype
@@ -9,16 +11,27 @@ from tqdm import tqdm
 from ..bg import remove
 
 
+
+
 def main():
     model_path = os.environ.get(
         "U2NETP_PATH",
         os.path.expanduser(os.path.join("~", ".u2net")),
     )
+
     model_choices = [os.path.splitext(os.path.basename(x))[0] for x in set(glob.glob(model_path + "/*"))]
     if len(model_choices) == 0:
         model_choices = ["u2net", "u2netp", "u2net_human_seg"]
 
     ap = argparse.ArgumentParser()
+
+    ap.add_argument(
+        "-b",
+        "--bucket",
+        default="yogupta",
+        type=str,
+        help="bucket name",
+    )
 
     ap.add_argument(
         "-m",
@@ -77,6 +90,23 @@ def main():
         nargs=2,
         help="An input folder and an output folder.",
     )
+    ap.add_argument(
+        "--s3",
+        default="",
+        type=bool,
+        help="use s3 bucket or not",
+    )
+    ap.add_argument(
+        "--s3_key_id",
+        default="",
+        type=str,
+    )
+
+    ap.add_argument(
+        "--s3_key",
+        default="",
+        type=str,
+    )
 
     ap.add_argument(
         "-o",
@@ -86,6 +116,7 @@ def main():
         type=argparse.FileType("wb"),
         help="Path to the output png image.",
     )
+
 
     ap.add_argument(
         "input",
@@ -97,11 +128,21 @@ def main():
 
     args = ap.parse_args()
 
+    s3 = boto3.client('s3', aws_access_key_id=args.s3_key_id, aws_secret_access_key=args.s3_key)
+
     r = lambda i: i.buffer.read() if hasattr(i, "buffer") else i.read()
     w = lambda o, data: o.buffer.write(data) if hasattr(o, "buffer") else o.write(data)
 
     if args.path:
         full_paths = [os.path.abspath(path) for path in args.path]
+
+        if args.s3:
+            s3_inputs = s3.list_objects_v2(Bucket=args.bucket)
+            contents = s3_inputs["Contents"]
+            for obj in contents:
+                if str(obj["Key"]).startswith("input"):
+                    print(obj["Key"])
+                    s3.download_file(args.bucket, obj["Key"], obj["Key"])
 
         input_paths = [full_paths[0]]
         output_path = full_paths[1]
@@ -139,6 +180,9 @@ def main():
                             alpha_matting_base_size=args.alpha_matting_base_size,
                         ),
                     )
+                    # if args.s3:
+                    #     print(os.path.basename(output.name), "here")
+                    #     s3.upload_file(output.name, args.bucket, "output/"+os.path.basename(output.name))
 
     else:
         w(
