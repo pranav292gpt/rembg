@@ -140,8 +140,8 @@ def main():
             s3_inputs = s3.list_objects_v2(Bucket=args.bucket)
             contents = s3_inputs["Contents"]
             for obj in contents:
-                if str(obj["Key"]).startswith("input"):
-                    print(obj["Key"])
+                if str(obj["Key"]).startswith("input") and str(obj["Key"]) != "input/":
+                    print("filename:", obj["Key"])
                     s3.download_file(args.bucket, obj["Key"], obj["Key"])
 
         input_paths = [full_paths[0]]
