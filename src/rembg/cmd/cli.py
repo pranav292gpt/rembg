@@ -117,7 +117,6 @@ def main():
         help="Path to the output png image.",
     )
 
-
     ap.add_argument(
         "input",
         nargs="?",

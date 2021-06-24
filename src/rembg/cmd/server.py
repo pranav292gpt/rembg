@@ -4,6 +4,7 @@ import argparse
 from io import BytesIO
 from urllib.parse import unquote_plus
 from urllib.request import urlopen
+import csv
 
 from flask import Flask, request, send_file
 from waitress import serve
@@ -45,7 +46,7 @@ def index():
         "U2NETP_PATH",
         os.path.expanduser(os.path.join("~", ".u2net")),
     )
-    model_choices = []# [os.path.splitext(os.path.basename(x))[0] for x in set(glob.glob(model_path + "/*"))]
+    model_choices = []  # [os.path.splitext(os.path.basename(x))[0] for x in set(glob.glob(model_path + "/*"))]
     # print(model_choices)
     if len(model_choices) == 0:
         model_choices = ["u2net", "u2netp", "u2net_human_seg"]
@@ -93,6 +94,7 @@ def main():
     )
 
     args = ap.parse_args()
+
     serve(app, host=args.addr, port=args.port)
 
 

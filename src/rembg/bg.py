@@ -1,5 +1,7 @@
 import functools
 import io
+import psutil
+import os
 
 import numpy as np
 from PIL import Image
@@ -8,21 +10,50 @@ from pymatting.foreground.estimate_foreground_ml import estimate_foreground_ml
 from pymatting.util.util import stack_images
 from scipy.ndimage.morphology import binary_erosion
 from time import time
-
+import csv
 from .u2net import detect
 
 
+def csv_writer(file):
+    return open(file, 'a',)
+    # return csv.writer(csv_file)
+
+
+csv_file = csv_writer("./times.csv")
+
+pid = os.getpid()
+py = psutil.Process(pid)
+
+id_count = 1
+
+field_names = ["id", "time", "cpu", "memory", "memory_process"]
+
 def timing_decorator(func):
-    def inner1(*args, **kwargs):
+
+    def inner(*args, **kwargs):
+        global id_count
+
         t1 = time()
-
         res = func(*args, **kwargs)
-
         t2 = time()
-        print(t2-t1)
+        writer = csv.DictWriter(csv_file, field_names)
+
+        data = {
+            "id": id_count,
+            "time": t2-t1,
+            "cpu": psutil.cpu_percent(),
+            "memory": psutil.virtual_memory()[2],
+            "memory_process": py.memory_info()[0]/2.**30,
+        }
+
+        id_count = id_count + 1
+        writer.writerow(data)
+        csv_file.flush()
+
         return res
 
-    return inner1
+    return inner
+
 
 def alpha_matting_cutout(
     img,
