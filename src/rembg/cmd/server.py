@@ -6,12 +6,17 @@ from urllib.parse import unquote_plus
 from urllib.request import urlopen
 import csv
 
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file,send_from_directory
 from waitress import serve
 
 from ..bg import remove
 
 app = Flask(__name__)
+
+
+@app.route("/csv_metrics", methods=["GET"])
+def csv_handler():
+    return send_file('../../../times.csv', mimetype='text/plain', as_attachment=False)
 
 
 @app.route("/", methods=["GET", "POST"])
