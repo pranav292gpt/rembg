@@ -1,9 +1,11 @@
 import os
 import glob
+import io
 import argparse
 from io import BytesIO
 from urllib.parse import unquote_plus
 from urllib.request import urlopen
+from PIL import Image
 import csv
 
 from flask import Flask, request, send_file,send_from_directory
@@ -46,6 +48,8 @@ def index():
     ae = request.values.get("ae", type=int, default=10)
     az = request.values.get("az", type=int, default=1000)
 
+    file_name = request.values.get("filename")
+
     model = request.args.get("model", type=str, default="u2net")
     model_path = os.environ.get(
         "U2NETP_PATH",
@@ -70,10 +74,12 @@ def index():
                     alpha_matting_background_threshold=ab,
                     alpha_matting_erode_structure_size=ae,
                     alpha_matting_base_size=az,
+                    file_name=file_name,
                 )
             ),
             mimetype="image/png",
         )
+
     except Exception as e:
         app.logger.exception(e, exc_info=True)
         return {"error": "oops, something went wrong!"}, 500

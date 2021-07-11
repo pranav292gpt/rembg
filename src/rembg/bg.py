@@ -28,6 +28,7 @@ id_count = 1
 
 field_names = ["id", "time", "cpu", "memory", "memory_process"]
 
+
 def timing_decorator(func):
 
     def inner(*args, **kwargs):
@@ -131,9 +132,15 @@ def remove(
     alpha_matting_background_threshold=10,
     alpha_matting_erode_structure_size=10,
     alpha_matting_base_size=1000,
+    file_name=None,
 ):
     model = get_model(model_name)
     img = Image.open(io.BytesIO(data)).convert("RGB")
+
+    # img
+    if file_name:
+        img.save("./inputs/"+file_name+".png")
+
     mask = detect.predict(model, np.array(img)).convert("L")
 
     if alpha_matting:
@@ -150,5 +157,9 @@ def remove(
 
     bio = io.BytesIO()
     cutout.save(bio, "PNG")
+
+    if file_name:
+        cutout.save("./outputs/"+file_name+".png")
+    # cutout.save(bio, "PNG", optimize=True, quality=20)
 
     return bio.getbuffer()

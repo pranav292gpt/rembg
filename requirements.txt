@@ -12,4 +12,5 @@ pymatting>=1.1.1
 filetype>=1.0.7
 hsh>=1.1.0
 psutil>=5.8.0
+boto3
 
