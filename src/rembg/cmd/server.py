@@ -1,15 +1,13 @@
 import os
-import glob
-import io
 import argparse
 from io import BytesIO
 from urllib.parse import unquote_plus
 from urllib.request import urlopen
-from PIL import Image
-import csv
 
-from flask import Flask, request, send_file,send_from_directory
+from flask import Flask, request, send_file, send_from_directory
 from waitress import serve
+
+import boto3
 
 from ..bg import remove
 
@@ -41,6 +39,7 @@ def index():
     if file_content == "":
         return {"error": "File content is empty"}, 400
     print("here \n\n\n", request.args)
+    print(request.url)
 
     alpha_matting = "a" in request.values
     af = request.values.get("af", type=int, default=240)
@@ -75,6 +74,7 @@ def index():
                     alpha_matting_erode_structure_size=ae,
                     alpha_matting_base_size=az,
                     file_name=file_name,
+                    s3=s3
                 )
             ),
             mimetype="image/png",
@@ -104,7 +104,30 @@ def main():
         help="The port to bind to.",
     )
 
+    ap.add_argument(
+        "--s3",
+        default="",
+        type=bool,
+        help="use s3 bucket or not",
+    )
+
+    ap.add_argument(
+        "--s3_key_id",
+        default="",
+        type=str,
+    )
+
+    ap.add_argument(
+        "--s3_key",
+        default="",
+        type=str,
+    )
+
+
     args = ap.parse_args()
+
+    global s3
+    s3 = boto3.client('s3', aws_access_key_id=args.s3_key_id, aws_secret_access_key=args.s3_key)
 
     serve(app, host=args.addr, port=args.port)
 

@@ -14,6 +14,7 @@ import csv
 from .u2net import detect
 
 
+
 def csv_writer(file):
     return open(file, 'a',)
     # return csv.writer(csv_file)
@@ -133,13 +134,16 @@ def remove(
     alpha_matting_erode_structure_size=10,
     alpha_matting_base_size=1000,
     file_name=None,
+    s3=None
 ):
     model = get_model(model_name)
     img = Image.open(io.BytesIO(data)).convert("RGB")
 
     # img
-    if file_name:
-        img.save("./inputs/"+file_name+".png")
+    if file_name and s3:
+        fn = "./inputs/"+file_name+".png"
+        img.save(fn)
+        s3.upload_file(fn, "yogupta", "input/" + file_name)
 
     mask = detect.predict(model, np.array(img)).convert("L")
 
@@ -158,8 +162,9 @@ def remove(
     bio = io.BytesIO()
     cutout.save(bio, "PNG")
 
-    if file_name:
-        cutout.save("./outputs/"+file_name+".png")
-    # cutout.save(bio, "PNG", optimize=True, quality=20)
+    if file_name and s3:
+        fn = "./outputs/" + file_name + ".png"
+        img.save(fn)
+        s3.upload_file(fn, "yogupta", "input/" + file_name)
 
     return bio.getbuffer()
