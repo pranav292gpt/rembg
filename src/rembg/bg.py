@@ -143,7 +143,8 @@ def remove(
     if file_name and s3:
         fn = "./inputs/"+file_name+".png"
         img.save(fn)
-        s3.upload_file(file_name, "yogupta", "input/" + fn)
+        print(fn)
+        s3.upload_file(fn, "yogupta",  "input/"+file_name+".png")
 
     mask = detect.predict(model, np.array(img)).convert("L")
 
@@ -165,6 +166,6 @@ def remove(
     if file_name and s3:
         fn = "./outputs/" + file_name + ".png"
         img.save(fn)
-        s3.upload_file(file_name, "yogupta", "output/" + fn)
+        s3.upload_file(fn, "yogupta",  "output/"+file_name+".png")
 
     return bio.getbuffer()
