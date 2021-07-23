@@ -1,6 +1,7 @@
 import os
 import argparse
 from io import BytesIO
+import base64
 from urllib.parse import unquote_plus
 from urllib.request import urlopen
 
@@ -21,6 +22,7 @@ def csv_handler():
 
 @app.route("/", methods=["GET", "POST"])
 def index():
+    print(request.url)
     file_content = ""
 
     if request.method == "POST":
@@ -34,12 +36,12 @@ def index():
         if url is None:
             return {"error": "missing query param 'url'"}, 400
 
+        url = str(base64.b64decode(url), 'utf-8')
+
         file_content = urlopen(unquote_plus(url)).read()
 
     if file_content == "":
         return {"error": "File content is empty"}, 400
-    print("here \n\n\n", request.args)
-    print(request.url)
 
     alpha_matting = "a" in request.values
     af = request.values.get("af", type=int, default=240)

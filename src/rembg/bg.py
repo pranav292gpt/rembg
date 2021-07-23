@@ -161,7 +161,8 @@ def remove(
         cutout = naive_cutout(img, mask)
 
     bio = io.BytesIO()
-    cutout.save(bio, "PNG")
+    # cutout.save(bio, "PNG")
+    cutout.save(bio, "PNG", optimize=True)
 
     if file_name and s3:
         fn = "./outputs/" + file_name + ".png"
